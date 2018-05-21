@@ -45,10 +45,14 @@ class BeaconArrayAdapter extends ArrayAdapter<Beacon> {
     }
     ImageView registrationStatus = (ImageView) convertView.findViewById(R.id.registrationStatus);
     TextView beaconId = (TextView) convertView.findViewById(R.id.beaconId);
+    TextView beaconRssiTW= (TextView) convertView.findViewById(R.id.beaconRssi);
+
+
     beaconId.setText(beacon.getHexId());
 
-    TextView beaconRssiTW= (TextView) convertView.findViewById(R.id.beaconRssi);
-    beaconRssiTW.setText(beacon.rssi);
+
+
+
     switch (beacon.status) {
       case Beacon.UNREGISTERED:
         registrationStatus.setImageResource(R.drawable.ic_action_lock_open);
@@ -59,6 +63,7 @@ class BeaconArrayAdapter extends ArrayAdapter<Beacon> {
         registrationStatus.setImageResource(R.drawable.ic_action_check_circle);
         registrationStatus.setColorFilter(GREEN);
         beaconId.setTextColor(BLACK);
+        beaconRssiTW.setTextColor(GREEN);
         break;
       case Beacon.STATUS_INACTIVE:
         registrationStatus.setImageResource(R.drawable.ic_action_check_circle);
@@ -84,8 +89,10 @@ class BeaconArrayAdapter extends ArrayAdapter<Beacon> {
         registrationStatus.setImageResource(R.drawable.ic_action_help);
         registrationStatus.setColorFilter(BLACK);
         beaconId.setTextColor(BLACK);
+        beaconRssiTW.setTextColor(BLACK);
         break;
     }
+    beaconRssiTW.setText(String.format(beacon.getRssi().toString(),"%d"));
 
     return convertView;
   }

@@ -251,7 +251,6 @@ public class MainActivityFragment extends Fragment {
     // from GMS. Run this check every time another activity has finished running.
     String accountName = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0)
           .getString("accountName", "");
-    //String accountName="gretaromagnoli1993@gmail.com";
     if (!accountName.equals("")) {
       new AuthorizedServiceTask(getActivity(), accountName).execute();
     }
