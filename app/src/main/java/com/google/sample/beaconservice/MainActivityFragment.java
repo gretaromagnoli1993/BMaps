@@ -368,6 +368,9 @@ public class MainActivityFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putString("accountName", accountNameView.getText().toString());
         bundle.putParcelable("beacon", arrayAdapter.getItem(position));
+        //added
+        bundle.putString("rssi",beacon.getRssi().toString());
+
         ManageBeaconFragment fragment = new ManageBeaconFragment();
         fragment.setArguments(bundle);
         getFragmentManager()

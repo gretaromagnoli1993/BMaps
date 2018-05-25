@@ -22,6 +22,6 @@ android {
 
 dependencies {
     implementation project(':libproximitybeacon')
-    compile 'joda-time:joda-time:2.8'
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'joda-time:joda-time:2.8'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 }
