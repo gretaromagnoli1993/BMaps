@@ -61,6 +61,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import static java.lang.Thread.sleep;
 
 /**
  * The MainActivityFragment is responsible for launching the account picker, ensuring the user has
@@ -298,36 +301,44 @@ public class MainActivityFragment extends Fragment {
     scanButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Utils.setEnabledViews(false, scanButton);
-        arrayAdapter.clear();
-        scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
-        Log.i(TAG, "starting scan");
-        client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
-        CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
-          @Override
-          public void onTick(long millisUntilFinished) {
-            double i = (1 - millisUntilFinished / (double) SCAN_TIME_MILLIS) * 100;
-            progressBar.setProgress((int) i);
-          }
 
-          @Override
-          public void onFinish() {
-            progressBar.setProgress(100);
-          }
-        };
-        countDownTimer.start();
 
-        Runnable stopScanning = new Runnable() {
-          @Override
-          public void run() {
-            scanner.stopScan(scanCallback);
-            Log.i(TAG, "stopped scan");
-            Utils.setEnabledViews(true, scanButton);
-          }
-        };
-        handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);
+            Utils.setEnabledViews(false, scanButton);
+            arrayAdapter.clear();
+            scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
+            Log.i(TAG, "starting scan");
+            client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
+            CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
+              @Override
+              public void onTick(long millisUntilFinished) {
+                double i = (1 - millisUntilFinished / (double) SCAN_TIME_MILLIS) * 100;
+                progressBar.setProgress((int) i);
+              }
+
+              @Override
+              public void onFinish() {
+                progressBar.setProgress(100);
+              }
+            };
+            countDownTimer.start();
+
+            Runnable stopScanning = new Runnable() {
+              @Override
+              public void run() {
+                scanner.stopScan(scanCallback);
+                Log.i(TAG, "stopped scan");
+                Utils.setEnabledViews(true, scanButton);
+              }
+            };
+
+            handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);
+
+
+
+
       }
     });
+
 
     accountNameView = (TextView)rootView.findViewById(R.id.accountName);
     accountNameView.setOnClickListener(new View.OnClickListener() {

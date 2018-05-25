@@ -26,6 +26,8 @@ public class MainActivity extends Activity {
     getFragmentManager().beginTransaction()
         .add(R.id.container, new MainActivityFragment())
         .commit();
+
+    getFragmentManager().beginTransaction().add(R.id.container,new MainActivityFragment()).commit();
   }
 
 }
