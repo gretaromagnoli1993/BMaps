@@ -15,19 +15,40 @@
 package com.google.sample.beaconservice;
 
 import android.app.Activity;
+import android.app.Fragment;
+//import android.app.FragmentManager;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+//import android.support.v4.app.FragmentManager;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 
 public class MainActivity extends Activity {
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    getFragmentManager().beginTransaction()
-        .add(R.id.container, new MainActivityFragment())
-        .commit();
+    /*getFragmentManager().beginTransaction()
+        .add(R.id.listFragment, new MainActivityFragment())
+        .commit();*/
+    MapsFragment mappa =new MapsFragment();
+    MainActivityFragment lista =new MainActivityFragment();
 
-    //getFragmentManager().beginTransaction().add(R.id.container,new MapsFragment()).commit();
+    FragmentManager manager= getFragmentManager();
+    FragmentTransaction fragmentTransaction=manager.beginTransaction();
+
+    fragmentTransaction.add(R.id.mapFragment, mappa,"Map_frag");
+    fragmentTransaction.add(R.id.listFragment, lista,"List_frag");
+
+    fragmentTransaction.commit();
   }
 
 }
