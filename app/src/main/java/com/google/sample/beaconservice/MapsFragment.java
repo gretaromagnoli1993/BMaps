@@ -7,51 +7,64 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Map;
 
 
-public class MapsFragment extends Fragment{
-    //public MapView mappa;
-    GoogleMap mappa;
+public class MapsFragment extends Fragment implements OnMapReadyCallback{
+    public MapView mappa;
+    public GoogleMap mMap;
+    public View v;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
-        //mappa.getMapAsync();
-        //setUpMapIfNeeded();
+       v=inflater.inflate(R.layout.maps_layout,container,false);
 
-       // mappa = ((MapFragment) getFragmentManager().findFragmentById(R.id.beaconMapView)).getMap();
+        mappa= (MapView) v.findViewById(R.id.beaconMapView);
+        mappa.onCreate(savedInstanceState);
+        mappa.getMapAsync(this);
 
 
-
-
-        return inflater.inflate(R.layout.maps_layout,container,false);
+        return v;
 
     }
 
 
-/*
-    //GoogleMap  mMap;
     @Override
-    public void onResume() {
-        super.onResume();
-        setUpMapIfNeeded();
+    public void onMapReady(GoogleMap map) {
+        mMap=map;
+        LatLng Ancona = new LatLng(43.587131,13.517399);
+        mMap.addMarker(new MarkerOptions().position(Ancona).title("UnivPM"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(Ancona));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+        mappa.onResume();
+    }
+    @Override
+    public final void onDestroy()
+    {
+        mappa.onDestroy();
+        super.onDestroy();
     }
 
-
-    private void setUpMapIfNeeded() {
-        if (mappa != null) {
-            return;
-        }
-        mappa = ((MapFragment) getFragmentManager().findFragmentById(R.id.beaconMapView)).getMap();
-        if (mappa == null) {
-            return;
-        }
-        // Initialize map options. For example:
-        mappa.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+    @Override
+    public final void onLowMemory()
+    {
+        mappa.onLowMemory();
+        super.onLowMemory();
     }
 
-*/
+    @Override
+    public final void onPause()
+    {
+        mappa.onPause();
+        super.onPause();
+    }
 }

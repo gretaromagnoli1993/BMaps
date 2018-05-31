@@ -22,23 +22,25 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 //import android.support.v4.app.FragmentManager;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 
-public class MainActivity extends Activity {
-
+public class MainActivity extends Activity  {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    /*getFragmentManager().beginTransaction()
-        .add(R.id.listFragment, new MainActivityFragment())
-        .commit();*/
+
     MapsFragment mappa =new MapsFragment();
     MainActivityFragment lista =new MainActivityFragment();
 
@@ -49,6 +51,8 @@ public class MainActivity extends Activity {
     fragmentTransaction.add(R.id.listFragment, lista,"List_frag");
 
     fragmentTransaction.commit();
+
   }
+
 
 }

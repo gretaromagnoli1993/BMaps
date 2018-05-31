@@ -294,51 +294,60 @@ public class MainActivityFragment extends Fragment {
                            Bundle savedInstanceState) {
     View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-    final ProgressBar progressBar = (ProgressBar)rootView.findViewById(R.id.progressBar);
+    final ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
     progressBar.setProgress(0);
     progressBar.getProgressDrawable().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
 
-    scanButton = (Button)rootView.findViewById(R.id.scanButton);
-    scanButton.setOnClickListener(new View.OnClickListener() {
+    scanButton = (Button) rootView.findViewById(R.id.scanButton);
+    /*scanButton.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(View v) {
+      public void onClick(View v) {*/
+    final Runnable runThis = new Runnable() {
+      @Override
+      public void run() {
 
+          Utils.setEnabledViews(false, scanButton);
+          arrayAdapter.clear();
+          scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
+          Log.i(TAG, "starting scan");
+          client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
+          CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+              double i = (1 - millisUntilFinished / (double) SCAN_TIME_MILLIS) * 100;
+              progressBar.setProgress((int) i);
+            }
 
-            Utils.setEnabledViews(false, scanButton);
-            arrayAdapter.clear();
-            scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
-            Log.i(TAG, "starting scan");
-            client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
-            CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
-              @Override
-              public void onTick(long millisUntilFinished) {
-                double i = (1 - millisUntilFinished / (double) SCAN_TIME_MILLIS) * 100;
-                progressBar.setProgress((int) i);
-              }
+            @Override
+            public void onFinish() {
+              progressBar.setProgress(100);
+            }
+          };
+          countDownTimer.start();
+          Runnable stopScanning = new Runnable() {
+            @Override
+            public void run() {
+              scanner.stopScan(scanCallback);
+              Log.i(TAG, "stopped scan");
+              Utils.setEnabledViews(true, scanButton);
+            }
+          };
 
-              @Override
-              public void onFinish() {
-                progressBar.setProgress(100);
-              }
-            };
-            countDownTimer.start();
-
-            Runnable stopScanning = new Runnable() {
-              @Override
-              public void run() {
-                scanner.stopScan(scanCallback);
-                Log.i(TAG, "stopped scan");
-                Utils.setEnabledViews(true, scanButton);
-              }
-            };
-
-            handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);
-
-
+          handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);
 
 
       }
-    });
+    };
+    scanButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Handler hndl=new Handler();
+        hndl.post(runThis);
+        //Thread scanning =new Thread(runThis);
+        //scanning.start();
+      }});
+
+    //});
 
 
     accountNameView = (TextView)rootView.findViewById(R.id.accountName);
