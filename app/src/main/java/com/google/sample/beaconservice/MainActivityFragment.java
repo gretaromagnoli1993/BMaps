@@ -43,6 +43,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -50,6 +51,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.drive.events.ChangeListener;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.sample.libproximitybeacon.ProximityBeacon;
 import com.google.sample.libproximitybeacon.ProximityBeaconImpl;
 import com.squareup.okhttp.Callback;
@@ -62,16 +67,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static java.lang.Thread.sleep;
 
+import static java.lang.Thread.getAllStackTraces;
+import static java.lang.Thread.sleep;
 /**
  * The MainActivityFragment is responsible for launching the account picker, ensuring the user has
  * given their permission for the app to use their account data, and starting the initial scan to
  * discover nearby Eddystone devices.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment{
+  private OnListUpdated mCallback;
+
+  public interface OnListUpdated{
+    public void onListUpdated(ArrayList<Beacon> list);
+  }
+
+  //create an instance of this interface
+
+
+
   private static final String TAG = MainActivityFragment.class.getSimpleName();
   private static final long SCAN_TIME_MILLIS = 2000;
 
@@ -114,7 +131,7 @@ public class MainActivityFragment extends Fragment {
   };
 
   private SharedPreferences sharedPreferences;
-  private ArrayList<Beacon> arrayList;
+  public ArrayList<Beacon> arrayList;
   private BeaconArrayAdapter arrayAdapter;
   private ScanCallback scanCallback;
   private BluetoothLeScanner scanner;
@@ -129,7 +146,6 @@ public class MainActivityFragment extends Fragment {
     sharedPreferences = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
     arrayList = new ArrayList<>();
     arrayAdapter = new BeaconArrayAdapter(getActivity(), R.layout.beacon_list_item, arrayList);
-
     scanCallback = new ScanCallback() {
       @Override
       public void onScanResult(int callbackType, ScanResult result) {
@@ -163,6 +179,7 @@ public class MainActivityFragment extends Fragment {
 
         Beacon beacon = new Beacon("EDDYSTONE", id, Beacon.STATUS_UNSPECIFIED, result.getRssi());
         insertIntoListAndFetchStatus(beacon);
+
       }
 
       @Override
@@ -185,6 +202,7 @@ public class MainActivityFragment extends Fragment {
 
   private void insertIntoListAndFetchStatus(final Beacon beacon) {
     arrayAdapter.add(beacon);
+    Toast.makeText(this.getActivity(), "Distance: "+calculateDistance(-59,beacon.getRssi()).shortValue()+"m", Toast.LENGTH_SHORT).show();
     arrayAdapter.sort(RSSI_COMPARATOR);
     Callback getBeaconCallback = new Callback() {
       @Override
@@ -221,6 +239,24 @@ public class MainActivityFragment extends Fragment {
       }
     };
     client.getBeacon(getBeaconCallback, beacon.getBeaconName());
+    if(mCallback!=null){
+      //added
+      //notify main activity of list changes
+      /*ArrayList<Beacon> list=new ArrayList<Beacon>();
+      byte[] a ={1};
+      Beacon b =new Beacon("hello",a,"OK",-30);
+      b.setLatLng(43.00,14.00);
+      list.add(0,b);
+      list.add(1,b);
+      //Toast.makeText(this.getActivity(), ((Integer) list.size()).toString(),Toast.LENGTH_SHORT).show();
+      */
+      try{
+      mCallback.onListUpdated(arrayList);
+      }catch(Exception e){
+        Log.e(TAG,"Error, mCallback was "+ mCallback.toString());
+      }
+
+    }
   }
 
   private void updateArrayAdapter() {
@@ -298,6 +334,11 @@ public class MainActivityFragment extends Fragment {
     progressBar.setProgress(0);
     progressBar.getProgressDrawable().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
 
+    try {
+      mCallback = (OnListUpdated) getActivity();
+    }catch(ClassCastException e){
+      throw new ClassCastException(getActivity().toString());
+    }
     scanButton = (Button) rootView.findViewById(R.id.scanButton);
     /*scanButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -343,8 +384,11 @@ public class MainActivityFragment extends Fragment {
       public void onClick(View v) {
         Handler hndl=new Handler();
         hndl.post(runThis);
-        //Thread scanning =new Thread(runThis);
-        //scanning.start();
+        /*if(arrayList.get(1)!=null){
+          spawnBeacon.addMarker(new MarkerOptions().position(arrayAdapter.getItem(1).getLatLng()).title("beacon"));
+
+        }*/
+
       }});
 
     //});
@@ -409,5 +453,24 @@ public class MainActivityFragment extends Fragment {
     Intent intent = AccountPicker.newChooseAccountIntent(
       null, null, accountTypes, false, null, null, null, null);
     startActivityForResult(intent, Constants.REQUEST_CODE_PICK_ACCOUNT);
+  }
+
+  public Double calculateDistance(int txPower, int rssi) {
+
+
+    if (rssi == 0) {
+      return -1.0; // if we cannot determine accuracy, return -1.
+    }
+
+    double ratio = rssi * 1.0 / txPower;
+    if (ratio < 1.0) {
+      return Math.pow(ratio, 10);
+    } else {
+      double distance = (0.89976) * Math.pow(ratio, 7.7095) + 0.111; //  restituisce la potenza della base che si desidera moltiplicare per se stessa a seconda del valore dell'esponenete
+
+      return distance;
+
+    }
+
   }
 }

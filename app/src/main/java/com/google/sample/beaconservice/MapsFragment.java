@@ -3,9 +3,11 @@ package com.google.sample.beaconservice;
 import android.os.Bundle;
 import android.app.Fragment;
 //import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +25,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     public MapView mappa;
     public GoogleMap mMap;
     public View v;
+    private static final String TAG = MainActivityFragment.class.getSimpleName();
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
@@ -31,12 +37,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         mappa= (MapView) v.findViewById(R.id.beaconMapView);
         mappa.onCreate(savedInstanceState);
         mappa.getMapAsync(this);
-
-
         return v;
 
-    }
 
+    }
+    public void spawnBeacon(Beacon b){
+        if(b.getLatLng()!=null) {
+            mMap.addMarker(new MarkerOptions().position(b.getLatLng()).title("beacon " + b.getRssi()));
+        }
+        else{
+            Log.i(TAG,"no LatLng for this beacon! skipping");
+        }
+        mappa.onResume();
+    }
 
     @Override
     public void onMapReady(GoogleMap map) {
@@ -68,4 +81,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         super.onPause();
         mappa.onResume();
     }
+
+
 }
+

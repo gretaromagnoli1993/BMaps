@@ -66,7 +66,11 @@ public class Beacon implements Parcelable {
   }
 
 
-
+  //testing
+  public void setLatLng(double lat ,double lng){
+    this.latitude=lat;
+    this.longitude=lng;
+  }
 
 
   public Beacon(JSONObject response) {

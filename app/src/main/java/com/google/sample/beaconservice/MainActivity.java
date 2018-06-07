@@ -20,6 +20,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 //import android.support.v4.app.FragmentManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,9 +34,25 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
-public class MainActivity extends Activity  {
+public class MainActivity extends Activity  implements MainActivityFragment.OnListUpdated{
+
+  public void onListUpdated(ArrayList<Beacon> list){
+    int i=list.size()-1;
+    MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
+    //Toast.makeText(this, ((Integer) list.size()).toString(),Toast.LENGTH_SHORT).show();
+    for( ;i>=0;i--) {
+        list.get(i).setLatLng(43.589433,13.515495);
+        mMap.spawnBeacon(list.get(i));
+    }
+    if(i>=2){
+      //ToDo:this
+      //getLocationWithTrilateration(list.get(1),list.get(2),list.get(3));
+    }
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +69,6 @@ public class MainActivity extends Activity  {
     fragmentTransaction.add(R.id.listFragment, lista,"List_frag");
 
     fragmentTransaction.commit();
-
-
 
 
   }
