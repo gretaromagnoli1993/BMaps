@@ -20,6 +20,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 //import android.support.v4.app.FragmentManager;
@@ -31,22 +32,28 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.sample.libproximitybeacon.ProximityBeaconImpl;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 
 public class MainActivity extends Activity  implements MainActivityFragment.OnListUpdated{
+  private static final String TAG = MainActivity.class.getSimpleName();
 
   public void onListUpdated(ArrayList<Beacon> list){
     int i=list.size()-1;
     MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
-    //Toast.makeText(this, ((Integer) list.size()).toString(),Toast.LENGTH_SHORT).show();
     for( ;i>=0;i--) {
-        list.get(i).setLatLng(43.589433,13.515495);
-        mMap.spawnBeacon(list.get(i));
+      Log.i(TAG,"Spawning beacon: "+list.get(i).getLatLng().toString() );
+      mMap.spawnBeacon(list.get(i));
     }
     if(i>=2){
       //ToDo:this

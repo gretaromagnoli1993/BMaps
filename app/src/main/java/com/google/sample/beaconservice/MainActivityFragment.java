@@ -63,11 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 
@@ -90,7 +86,7 @@ public class MainActivityFragment extends Fragment{
 
 
   private static final String TAG = MainActivityFragment.class.getSimpleName();
-  private static final long SCAN_TIME_MILLIS = 2000;
+  private static final long SCAN_TIME_MILLIS = 9000;
 
   // Receives the runnable that stops scanning after SCAN_TIME_MILLIS.
   private static final Handler handler = new Handler(Looper.getMainLooper());
@@ -137,6 +133,7 @@ public class MainActivityFragment extends Fragment{
   private BluetoothLeScanner scanner;
   private Button scanButton;
   private TextView accountNameView;
+  public Runnable runThis;
 
   ProximityBeacon client;
 
@@ -201,9 +198,9 @@ public class MainActivityFragment extends Fragment{
   }
 
   private void insertIntoListAndFetchStatus(final Beacon beacon) {
-    arrayAdapter.add(beacon);
-    Toast.makeText(this.getActivity(), "Distance: "+calculateDistance(-59,beacon.getRssi()).shortValue()+"m", Toast.LENGTH_SHORT).show();
-    arrayAdapter.sort(RSSI_COMPARATOR);
+    //arrayAdapter.add(beacon);
+    Toast.makeText(this.getActivity(), "Distance: "+calculateDistance(-60,beacon.getRssi()).shortValue()+"m", Toast.LENGTH_SHORT).show();
+    //arrayAdapter.sort(RSSI_COMPARATOR);
     Callback getBeaconCallback = new Callback() {
       @Override
       public void onFailure(com.squareup.okhttp.Request request, IOException e) {
@@ -233,30 +230,40 @@ public class MainActivityFragment extends Fragment{
             Log.e(TAG, "Unhandled beacon service response: " + response);
             return;
         }
-        int pos = arrayAdapter.getPosition(beacon);
-        arrayList.set(pos, fetchedBeacon);
-        updateArrayAdapter();
+        //int pos = arrayAdapter.getPosition(beacon);
+        //arrayList.set(pos, fetchedBeacon);
+        if(fetchedBeacon.latitude!=null&fetchedBeacon.longitude!=null) {
+          if (arrayList.size() > 0) {
+            int flag=0;
+            for (int i = arrayList.size()-1; i >= 0; i--) {
+              if (!fetchedBeacon.getHexId().equals(arrayList.get(i).getHexId())) {
+                flag=1;
+              }
+            }
+            if(flag==0){
+              arrayList.add(fetchedBeacon);
+              Log.i(TAG, Objects.requireNonNull(fetchedBeacon.getLatLng(), "No lat/lng found, null").toString());
+            }
+          }
+          else {
+            arrayList.add(fetchedBeacon);
+          }
+        }
+
+       updateArrayAdapter();
+       mCallback.onListUpdated(arrayList);
       }
     };
     client.getBeacon(getBeaconCallback, beacon.getBeaconName());
-    if(mCallback!=null){
-      //added
-      //notify main activity of list changes
-      /*ArrayList<Beacon> list=new ArrayList<Beacon>();
-      byte[] a ={1};
-      Beacon b =new Beacon("hello",a,"OK",-30);
-      b.setLatLng(43.00,14.00);
-      list.add(0,b);
-      list.add(1,b);
-      //Toast.makeText(this.getActivity(), ((Integer) list.size()).toString(),Toast.LENGTH_SHORT).show();
-      */
+    /*if(mCallback!=null){
       try{
       mCallback.onListUpdated(arrayList);
+      Log.i(TAG, "Lista aggiornata!");
       }catch(Exception e){
         Log.e(TAG,"Error, mCallback was "+ mCallback.toString());
       }
 
-    }
+    }*/
   }
 
   private void updateArrayAdapter() {
@@ -340,10 +347,8 @@ public class MainActivityFragment extends Fragment{
       throw new ClassCastException(getActivity().toString());
     }
     scanButton = (Button) rootView.findViewById(R.id.scanButton);
-    /*scanButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {*/
-    final Runnable runThis = new Runnable() {
+
+     runThis = new Runnable() {
       @Override
       public void run() {
 
@@ -371,6 +376,7 @@ public class MainActivityFragment extends Fragment{
               scanner.stopScan(scanCallback);
               Log.i(TAG, "stopped scan");
               Utils.setEnabledViews(true, scanButton);
+              handler.postDelayed(runThis,1000);
             }
           };
 
@@ -382,8 +388,10 @@ public class MainActivityFragment extends Fragment{
     scanButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Handler hndl=new Handler();
-        hndl.post(runThis);
+
+          Handler hndl = new Handler();
+          hndl.post(runThis);
+
         /*if(arrayList.get(1)!=null){
           spawnBeacon.addMarker(new MarkerOptions().position(arrayAdapter.getItem(1).getLatLng()).title("beacon"));
 
