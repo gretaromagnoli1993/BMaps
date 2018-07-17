@@ -31,22 +31,31 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.sample.libproximitybeacon.ProximityBeaconImpl;
+import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
+import com.lemmingapex.trilateration.TrilaterationFunction;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import org.apache.commons.math3.analysis.function.Cos;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class MainActivity extends Activity  implements MainActivityFragment.OnListUpdated{
   private static final String TAG = MainActivity.class.getSimpleName();
+  public  LatLng actualPosition=null;
 
   public void onListUpdated(ArrayList<Beacon> list){
     int i=list.size()-1;
@@ -55,10 +64,28 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
       Log.i(TAG,"Spawning beacon: "+list.get(i).getLatLng().toString() );
       mMap.spawnBeacon(list.get(i));
     }
-    if(i>=2){
-      //ToDo:this
-      //getLocationWithTrilateration(list.get(1),list.get(2),list.get(3));
+    /*
+    if(i>2){
+      double[][] position =new double[list.size()][2];
+      double distance[]=new double[list.size()];
+      for(Beacon beacon: list){
+        position[list.indexOf(beacon)][0]=convertToCartesian(beacon.getLatLng())[0];//x
+        position[list.indexOf(beacon)][1]=convertToCartesian(beacon.getLatLng())[1];//y
+        distance[list.indexOf(beacon)]=calculateDistance(60,beacon.getRssi());
+      }
+
+      NonLinearLeastSquaresSolver solver =new NonLinearLeastSquaresSolver(new TrilaterationFunction(position,distance), new LevenbergMarquardtOptimizer());
+      Optimum optimum=solver.solve();
+      double[] centroid=optimum.getPoint().toArray();//ToDo: inverse function
+      if(convertToLatLng(centroid)!=actualPosition){
+
+        actualPosition=convertToLatLng(centroid);
+        mMap.spawnMe(actualPosition);
+        Log.i(TAG,"Spawning position: "+actualPosition.toString() );
+
+      }
     }
+    */
   }
 
   @Override
@@ -77,6 +104,48 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
 
     fragmentTransaction.commit();
 
+
+  }
+  public Double calculateDistance(int txPower, int rssi) {
+
+
+    if (rssi == 0) {
+      return -1.0; // if we cannot determine accuracy, return -1.
+    }
+
+    double ratio = rssi * 1.0 / txPower;
+    if (ratio < 1.0) {
+      return Math.pow(ratio, 10);
+    } else {
+      double distance = (0.89976) * Math.pow(ratio, 7.7095) + 0.111; //  restituisce la potenza della base che si desidera moltiplicare per se stessa a seconda del valore dell'esponenete
+
+      return distance;
+
+    }
+
+  }
+  public double[] convertToCartesian(LatLng latLng){
+    int R= 6371; //raggio medio terra
+    double[] coordinate=new double[]{0,0,0};
+    coordinate[0]=R*(Math.cos(Math.toRadians(latLng.latitude)))*Math.cos(Math.toRadians(latLng.longitude));
+    coordinate[1]=R*(Math.cos(Math.toRadians(latLng.latitude)))*Math.sin(Math.toRadians(latLng.longitude));
+    coordinate[2]=R*Math.sin(latLng.latitude);
+    return coordinate;
+  }
+  public LatLng convertToLatLng(double[] coordinate){
+    int R= 6371; //raggio medio terra
+    double latitude=Math.asin(coordinate[1]/R)*(180/Math.PI);
+    double longitude;
+    if(coordinate [0]>0){
+      longitude=Math.atan2(coordinate[1],coordinate[0])*(180/Math.PI);
+    }
+    else if(coordinate[1]>0){
+      longitude=Math.atan2(coordinate[1],coordinate[0])*(180/Math.PI)+180;
+    }
+    else {
+      longitude = Math.atan2(coordinate[1], coordinate[0]) * (180 / Math.PI) - 180;
+    }
+    return new LatLng(latitude,longitude);
 
   }
 

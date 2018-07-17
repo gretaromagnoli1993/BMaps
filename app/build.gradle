@@ -24,6 +24,7 @@ dependencies {
     implementation project(':libproximitybeacon')
     implementation 'joda-time:joda-time:2.8'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.lemmingapex.trilateration:trilateration:1.0.2'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
 }

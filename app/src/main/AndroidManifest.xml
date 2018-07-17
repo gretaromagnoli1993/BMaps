@@ -30,7 +30,7 @@
     <!-- Required for the Static Maps API used here to display the registered location
          of the beacon -->
     <meta-data android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyCRI6s1XrUMJVEzwNi377rR7Wo1WRjMN3g"/>
+        android:value="AIzaSyAOH0j4JgZxZTa7XTAYpPZBGCFxJEkVyGU"/>
 
     <!-- android:value="AIzaSyCa8xRLl3CGQbBi5ZbhJ8g0OaoyYd0zoLc"/> -->
 

@@ -15,9 +15,13 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -26,10 +30,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     public GoogleMap mMap;
     public View v;
     private static final String TAG = MainActivityFragment.class.getSimpleName();
+    List<Marker> postionList=new ArrayList<Marker>();
 
 
-
-    @Override
+  @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
        v=inflater.inflate(R.layout.maps_layout,container,false);
@@ -38,17 +42,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         mappa.onCreate(savedInstanceState);
         mappa.getMapAsync(this);
         return v;
-
-
-    }
-    public void spawnBeacon(Beacon b){
-        if(b.getLatLng()!=null) {
-            mMap.addMarker(new MarkerOptions().position(b.getLatLng()).title("beacon " + b.getRssi()));
-        }
-        else{
-            Log.i(TAG,"no LatLng for this beacon! skipping");
-        }
-        mappa.onResume();
     }
 
     @Override
@@ -58,8 +51,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         mMap.addMarker(new MarkerOptions().position(Ancona).title("UnivPM"));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(Ancona));
-        mappa.onResume();
+        //final Marker me=mMap.addMarker(new MarkerOptions().position(Ancona).title("Posizione"));
+
+
+      mappa.onResume();
+
     }
+
+
     @Override
     public final void onDestroy()
     {
@@ -81,7 +80,32 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         super.onPause();
         mappa.onResume();
     }
+    public void spawnBeacon(Beacon b){
+        if(b.getLatLng()!=null) {
+            mMap.addMarker(new MarkerOptions().position(b.getLatLng()).title("beacon " + b.getHexId()));
+        }
+        else{
+            Log.i(TAG,"no LatLng for this beacon! skipping");
+        }
+        mappa.onResume();
+    }
 
+    public void spawnMe(LatLng b){
+        if(b!=null) {
+            if(postionList.size()>0){
+              for(Marker marker: postionList){
+                  marker.remove();
+              }
+              postionList.clear();
+            }
+            Marker posizione =mMap.addMarker(new MarkerOptions().position(b).title("me").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            postionList.add(posizione);
+        }
+        else{
+            Log.i(TAG,"no LatLng for actual position! skipping");
+        }
+        mappa.onResume();
+    }
 
 }
 

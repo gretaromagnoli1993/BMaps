@@ -86,7 +86,7 @@ public class MainActivityFragment extends Fragment{
 
 
   private static final String TAG = MainActivityFragment.class.getSimpleName();
-  private static final long SCAN_TIME_MILLIS = 9000;
+  private static final long SCAN_TIME_MILLIS = 5000;
 
   // Receives the runnable that stops scanning after SCAN_TIME_MILLIS.
   private static final Handler handler = new Handler(Looper.getMainLooper());
@@ -240,7 +240,7 @@ public class MainActivityFragment extends Fragment{
                 flag=1;
               }
             }
-            if(flag==0){
+            if(flag==0) {
               arrayList.add(fetchedBeacon);
               Log.i(TAG, Objects.requireNonNull(fetchedBeacon.getLatLng(), "No lat/lng found, null").toString());
             }
@@ -255,15 +255,6 @@ public class MainActivityFragment extends Fragment{
       }
     };
     client.getBeacon(getBeaconCallback, beacon.getBeaconName());
-    /*if(mCallback!=null){
-      try{
-      mCallback.onListUpdated(arrayList);
-      Log.i(TAG, "Lista aggiornata!");
-      }catch(Exception e){
-        Log.e(TAG,"Error, mCallback was "+ mCallback.toString());
-      }
-
-    }*/
   }
 
   private void updateArrayAdapter() {
@@ -348,7 +339,7 @@ public class MainActivityFragment extends Fragment{
     }
     scanButton = (Button) rootView.findViewById(R.id.scanButton);
 
-     runThis = new Runnable() {
+    runThis = new Runnable() {
       @Override
       public void run() {
 
@@ -379,28 +370,16 @@ public class MainActivityFragment extends Fragment{
               handler.postDelayed(runThis,1000);
             }
           };
-
           handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);
-
-
       }
     };
     scanButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-
           Handler hndl = new Handler();
           hndl.post(runThis);
 
-        /*if(arrayList.get(1)!=null){
-          spawnBeacon.addMarker(new MarkerOptions().position(arrayAdapter.getItem(1).getLatLng()).title("beacon"));
-
-        }*/
-
       }});
-
-    //});
-
 
     accountNameView = (TextView)rootView.findViewById(R.id.accountName);
     accountNameView.setOnClickListener(new View.OnClickListener() {
