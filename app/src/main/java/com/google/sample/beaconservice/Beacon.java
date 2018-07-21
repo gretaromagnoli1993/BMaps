@@ -18,10 +18,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
+import android.util.Base64;
+import android.util.Log;
+import com.google.android.gms.ads.internal.request.StringParcel;
 import com.google.android.gms.maps.model.LatLng;
 
+import com.google.sample.libproximitybeacon.ProximityBeaconImpl;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple struct representation of a Beacon object. Supports basic parsing and serialization
@@ -34,10 +42,14 @@ public class Beacon implements Parcelable {
   static final String STATUS_INACTIVE = "INACTIVE";
   static final String STATUS_DECOMMISSIONED = "DECOMMISSIONED";
   static final String STABILITY_UNSPECIFIED = "STABILITY_UNSPECIFIED";
+  private static final String TAG = ProximityBeaconImpl.class.getSimpleName();
+
 
   // These constants are convenience for this app:
   static final String UNREGISTERED = "UNREGISTERED";
   static final String NOT_AUTHORIZED = "NOT_AUTHORIZED";
+  static final String PROJECT_ID= "beacon-tirocinio";
+
 
   String type;
   byte[] id;
@@ -47,6 +59,7 @@ public class Beacon implements Parcelable {
   Double longitude;
   String expectedStability;
   String description;
+  List<Duet> attachments;
 
   // This isn't really a beacon property, but it's useful to have it here so we can sort
   // the list of beacons during scanning so the closest and/or strongest is listed first.
@@ -63,6 +76,7 @@ public class Beacon implements Parcelable {
     this.expectedStability = null;
     this.description = null;
     this.rssi = rssi;
+    this.attachments=null;
   }
 
 
@@ -79,7 +93,17 @@ public class Beacon implements Parcelable {
       type = json.getString("type");
       id = Utils.base64Decode(json.getString("id"));
     } catch (JSONException e) {
-      // NOP
+      //Log.e(TAG,"Error retrieving id from JSON!");
+    }
+
+    try {//ToDo: importante! stavi facendo un overload di advertisedId(questo) per rispettare la nuova struttura JSON (fatta di JSONArray)
+      JSONObject json= response.getJSONArray("beacons")
+              .getJSONObject(0).getJSONObject("advertisedId");
+      //Log.i(TAG,json.toString());
+      type = json.getString("type");
+      id = Utils.base64Decode(json.getString("id"));
+    } catch (JSONException e) {
+      Log.e(TAG,"More errors retrieving id from JSON!!!");
     }
 
     try {
@@ -115,6 +139,46 @@ public class Beacon implements Parcelable {
       // NOP
     }
 
+    try {
+      attachments=parseAttachments(response.toString());
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    try {
+      for(Duet att:attachments){
+        if(att.getName().equals("latitude")){
+          latitude=Double.parseDouble(att.getData());
+        }
+        if(att.getName().equals("longitude")){
+          longitude=Double.parseDouble(att.getData());
+        }
+      }
+    } catch (Exception e) {
+      latitude = null;
+      longitude = null;
+    }
+
+
+  }
+  private List<Duet> parseAttachments(String response)
+          throws JSONException {
+    List<Duet> parsed = new ArrayList<>();
+    JSONObject object = new JSONObject(response);
+
+    JSONArray attachments = object.getJSONArray("beacons")
+            .getJSONObject(0)
+            .getJSONArray("attachments");
+
+    for (int i=0; i < attachments.length(); i++) {
+      String decodedName = attachments.getJSONObject(i).getString("namespacedType").replace(PROJECT_ID+"/","");
+      //String decodedName = new String(Base64.decode(encodedName, Base64.NO_WRAP));
+      String encodedData = attachments.getJSONObject(i).getString("data");
+      String decodedData = new String(Base64.decode(encodedData, Base64.NO_WRAP));
+      Duet attachment=new Duet(decodedName,decodedData);
+      parsed.add(attachment);//todo: make this an array of objects containing namespacedTypes
+    }
+
+    return parsed;
   }
 
   public JSONObject toJson() throws JSONException {
@@ -148,6 +212,11 @@ public class Beacon implements Parcelable {
   public String getHexId() {
     return Utils.toHexString(id);
   }
+
+  public byte[] getId() {
+    return this.id;
+  }
+
   public Integer getRssi (){
     return rssi;
   }
@@ -244,5 +313,35 @@ public class Beacon implements Parcelable {
       return new Beacon[size];
     }
   };
+
+  public class Duet {
+    String name;
+    String data;
+
+    public Duet(String name, String data){
+      this.name=name;
+      this.data=data;
+    }
+    public Duet(){
+      this.data=null;
+      this.name=null;
+    }
+
+    public String getData() {
+      return data;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setData(String data) {
+      this.data = data;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+  }
 
 }

@@ -1,6 +1,10 @@
 <resources>
   <string name="app_name">Beacon Service Demo App</string>
   <string name="click_to_set">[click to set]</string>
+  <string name="latlngAttachment">beacon-tirocinio/latLng</string>
+  <string name="allAttachment">*</string>
+
+  <string name="api_key">AIzaSyAOH0j4JgZxZTa7XTAYpPZBGCFxJEkVyGU</string>
 
   <string-array name="stability_enums">
     <item>STABLE</item>

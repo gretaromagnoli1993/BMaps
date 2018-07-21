@@ -38,6 +38,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,6 +60,7 @@ import com.google.sample.libproximitybeacon.ProximityBeacon;
 import com.google.sample.libproximitybeacon.ProximityBeaconImpl;
 import com.squareup.okhttp.Callback;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -199,7 +201,7 @@ public class MainActivityFragment extends Fragment{
 
   private void insertIntoListAndFetchStatus(final Beacon beacon) {
     //arrayAdapter.add(beacon);
-    Toast.makeText(this.getActivity(), "Distance: "+calculateDistance(-60,beacon.getRssi()).shortValue()+"m", Toast.LENGTH_SHORT).show();
+    //Toast.makeText(this.getActivity(), "Distance: "+calculateDistance(-60,beacon.getRssi()).shortValue()+"m", Toast.LENGTH_SHORT).show();
     //arrayAdapter.sort(RSSI_COMPARATOR);
     Callback getBeaconCallback = new Callback() {
       @Override
@@ -214,7 +216,8 @@ public class MainActivityFragment extends Fragment{
           case 200:
             try {
               String body = response.body().string();
-              fetchedBeacon = new Beacon(new JSONObject(body));
+              fetchedBeacon = new Beacon(new JSONObject(body));//ToDo: fetch attachment, parse and update LatLng content
+              Log.i(TAG,"aggiungo il beacon: "+fetchedBeacon.id);
             } catch (JSONException e) {
               Log.e(TAG, "JSONException", e);
               return;
@@ -254,7 +257,12 @@ public class MainActivityFragment extends Fragment{
        mCallback.onListUpdated(arrayList);
       }
     };
-    client.getBeacon(getBeaconCallback, beacon.getBeaconName());
+    //client.getBeacon(getBeaconCallback, beacon.getBeaconName());//todo: edited
+    try {
+      client.getForObserved(getBeaconCallback,getObservedBody(beacon.getId(),getString(R.string.allAttachment)),getString(R.string.api_key));
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
   }
 
   private void updateArrayAdapter() {
@@ -295,7 +303,7 @@ public class MainActivityFragment extends Fragment{
   }
 
   @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+  public void onActivityResult(int requestCode, int resultCode, Intent data)  {
     super.onActivityResult(requestCode, resultCode, data);
     if (requestCode == Constants.REQUEST_CODE_PICK_ACCOUNT) {
       // Receiving a result from the AccountPicker
@@ -459,5 +467,28 @@ public class MainActivityFragment extends Fragment{
 
     }
 
+  }
+
+
+  private JSONObject getObservedBody(byte[] advertisement, String namespace)
+          throws JSONException {
+    int packetLength = 16;
+    int offset = advertisement.length - packetLength;
+    String id = Base64.encodeToString(advertisement,
+            offset, packetLength, Base64.NO_WRAP);
+    //Log.i(TAG, "actualID:  " + id);
+    //Log.i(TAG, "from adv:  " + Utils.toHexString(advertisement));
+    return new JSONObject()
+            .put("observations", new JSONArray()
+                    .put(new JSONObject()
+                            .put("advertisedId", new JSONObject()
+                                    .put("type", "EDDYSTONE")
+                                    .put("id", id)
+                            )
+                    )
+            )
+            .put("namespacedTypes", new JSONArray()
+                    .put(namespace)
+            );
   }
 }
