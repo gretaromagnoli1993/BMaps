@@ -148,25 +148,26 @@ public class ProximityBeaconImpl implements ProximityBeacon {
     @Override
     protected Void doInBackground(Void... params) {
       try {
-        final String token = GoogleAuthUtil.getToken(ctx, account, SCOPE);
+        //final String token = GoogleAuthUtil.getToken(ctx, account, SCOPE);
         Request.Builder requestBuilder = new Request.Builder()
-            .header(AUTHORIZATION, BEARER + token)
-            .url(ENDPOINT + urlPart);
+                //.header(AUTHORIZATION, BEARER + token)
+                .url(ENDPOINT + urlPart);
         switch (method) {
           case PUT:
             requestBuilder.put(RequestBody.create(MEDIA_TYPE_JSON, json));
             break;
           case POST:
-            requestBuilder.header("Accept","*/*").removeHeader(AUTHORIZATION).post(RequestBody.create(MEDIA_TYPE_JSON, json));
+            requestBuilder.header("Accept", "*/*").removeHeader(AUTHORIZATION).post(RequestBody.create(MEDIA_TYPE_JSON, json));
             break;
           case DELETE:
             requestBuilder.delete(RequestBody.create(MEDIA_TYPE_JSON, json));
             break;
-          default: break;
+          default:
+            break;
         }
         Request request = requestBuilder.build();
         httpClient.newCall(request).enqueue(new HttpCallback(callback));
-      } catch (UserRecoverableAuthException e) {
+      }/*catch (UserRecoverableAuthException e) {
         // GooglePlayServices.apk is either old, disabled, or not present
         // so we need to show the user some UI in the activity to recover.
         Log.e(TAG, "UserRecoverableAuthException", e);
@@ -179,7 +180,10 @@ public class ProximityBeaconImpl implements ProximityBeacon {
         // so this indicates something went wrong at a higher level.
         // TIP: Check for network connectivity before starting the AsyncTask.
         Log.e(TAG, "IOException", e);
-      }
+      }*/
+      catch(Exception e){
+        Log.e(TAG,e.toString());
+        }
       return null;
     }
   }

@@ -411,7 +411,7 @@ public class MainActivityFragment extends Fragment{
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Beacon beacon = arrayAdapter.getItem(position);
-        if (beacon.status.equals(Beacon.NOT_AUTHORIZED)) {
+        /*if (beacon.status.equals(Beacon.NOT_AUTHORIZED)) {
           new AlertDialog.Builder(getActivity()).setTitle("Not Authorized")
               .setMessage("You don't have permission to view the details of this beacon")
               .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -430,12 +430,20 @@ public class MainActivityFragment extends Fragment{
         bundle.putParcelable("beacon", arrayAdapter.getItem(position));
         //added
         bundle.putString("rssi",beacon.getRssi().toString());
-
-        ManageBeaconFragment fragment = new ManageBeaconFragment();
+        */
+        Beacon b= arrayList.get(position);
+        try {
+          Log.i(TAG, b.toJson().toString());
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+        Bundle bundle=new Bundle();
+        bundle.putParcelable("beacon",b);
+        BeaconDetailsFragment fragment = new BeaconDetailsFragment();
         fragment.setArguments(bundle);
         getFragmentManager()
             .beginTransaction()
-            .replace(R.id.container, fragment)
+            .replace(R.id.listFragment, fragment)
             .addToBackStack(TAG)
             .commit();
       }

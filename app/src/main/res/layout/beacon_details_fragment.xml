@@ -44,23 +44,6 @@
         android:layout_width="@dimen/col_1_width"
         />
 
-    <TextView
-        android:layout_column="0"
-        android:layout_gravity="end"
-        android:text="Status"
-        />
-
-    <TextView
-        android:id="@+id/status"
-        android:text="@string/click_to_set"
-        android:layout_width="@dimen/col_1_width"
-        />
-
-    <ImageView
-        android:id="@+id/mapView"
-        android:layout_columnSpan="3"
-        android:layout_gravity="center_horizontal"
-        />
 
     <TextView
         android:layout_column="0"
@@ -76,60 +59,6 @@
         android:drawablePadding="5dp"
         />
 
-    <TextView
-        android:layout_column="0"
-        android:layout_gravity="end"
-        android:text="Place ID"
-        />
-
-    <TextView
-        android:id="@+id/placeId"
-        android:text="@string/click_to_set"
-        android:layout_width="@dimen/col_1_width"
-        />
-
-    <TextView
-        android:layout_column="0"
-        android:layout_gravity="end"
-        android:text="Stability"
-        />
-
-    <TextView
-        android:id="@+id/expectedStability"
-        android:text="@string/click_to_set"
-        android:layout_width="@dimen/col_1_width"
-        android:drawableEnd="@drawable/ic_action_mode_edit"
-        android:drawablePadding="5dp"
-        />
-
-    <TextView
-        android:layout_column="0"
-        android:layout_gravity="end"
-        android:text="Description"
-        />
-
-    <TextView
-        android:id="@+id/description"
-        android:text="@string/click_to_set"
-        android:layout_width="@dimen/col_1_width"
-        android:drawableEnd="@drawable/ic_action_mode_edit"
-        android:drawablePadding="5dp"
-        />
-
-    <Button
-        android:id="@+id/actionButton"
-        android:layout_columnSpan="3"
-        android:layout_gravity="center_horizontal"
-        />
-
-    <Button
-        android:id="@+id/decommissionButton"
-        android:layout_columnSpan="3"
-        android:enabled="false"
-        android:text="Decommission"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone"
-        />
 
     <View
         android:id="@+id/attachmentsDivider"
