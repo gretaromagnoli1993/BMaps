@@ -48,7 +48,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     public void onMapReady(GoogleMap map) {
         mMap=map;
         LatLng Ancona = new LatLng(43.587131,13.517399);
-        mMap.addMarker(new MarkerOptions().position(Ancona).title("UnivPM"));
+        //mMap.addMarker(new MarkerOptions().position(Ancona).title("UnivPM"));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(Ancona));
         //final Marker me=mMap.addMarker(new MarkerOptions().position(Ancona).title("Posizione"));

@@ -213,6 +213,10 @@ public class Beacon implements Parcelable {
     return Utils.toHexString(id);
   }
 
+  public void setRssi(int rssi) {
+    this.rssi = rssi;
+  }
+
   public byte[] getId() {
     return this.id;
   }
