@@ -323,9 +323,9 @@ public class MainActivityFragment extends Fragment{
     // from GMS. Run this check every time another activity has finished running.
     String accountName = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0)
           .getString("accountName", "");
-    if (!accountName.equals("")) {
+    /*if (!accountName.equals("")) {
       new AuthorizedServiceTask(getActivity(), accountName).execute();
-    }
+    }*/
   }
 
   @Override
@@ -381,7 +381,7 @@ public class MainActivityFragment extends Fragment{
           arrayAdapter.clear();
           scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
           Log.i(TAG, "starting scan");
-          client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
+          //client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
           CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
