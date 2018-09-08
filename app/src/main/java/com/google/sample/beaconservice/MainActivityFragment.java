@@ -138,7 +138,7 @@ public class MainActivityFragment extends Fragment{
   private TextView accountNameView;
   public Runnable runThis;
 
-  ProximityBeacon client;
+  ProximityBeacon client= new ProximityBeaconImpl(getActivity(), "".toString());;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -383,7 +383,7 @@ public class MainActivityFragment extends Fragment{
           arrayAdapter.clear();
           scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
           Log.i(TAG, "starting scan");
-          client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());//ToDo:ripristinato per null pointer exception (andrebbe eliminato)
+          //client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());//ToDo:ripristinato per null pointer exception (andrebbe eliminato
           CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
             @Override
             public void onTick(long millisUntilFinished) {

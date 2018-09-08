@@ -22,15 +22,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.*;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class ProximityBeaconImpl implements ProximityBeacon {
   private static final String TAG = ProximityBeaconImpl.class.getSimpleName();
@@ -45,18 +42,19 @@ public class ProximityBeaconImpl implements ProximityBeacon {
 
   private final Context ctx;
   private final String account;
-  private final OkHttpClient httpClient;
+  private final OkHttpClient httpClient=new OkHttpClient();
 
   public ProximityBeaconImpl(Context ctx, String account) {
     this.ctx = ctx;
     this.account = account;
-    this.httpClient = new OkHttpClient();
+    //this.httpClient=client;
   }
   
   @Override
   public void getForObserved(Callback callback, JSONObject requestBody, String apiKey) {
     // The authorization step here isn't strictly necessary. The API key is enough.
-    new AuthTask("beaconinfo:getforobserved?key=" + apiKey, POST, requestBody.toString().replace("\\\\",""), callback).execute();
+    //new RequestThread("beaconinfo:getforobserved?key=" + apiKey, requestBody.toString().replace("\\\\",""), callback).start();
+     new AuthTask("beaconinfo:getforobserved?key=" + apiKey, POST, requestBody.toString().replace("\\\\",""), callback).execute();
   }
 
   @Override
@@ -122,6 +120,31 @@ public class ProximityBeaconImpl implements ProximityBeacon {
   @Override
   public void listNamespaces(Callback callback) {
     new AuthTask("namespaces", callback).execute();
+  }
+
+  private class RequestThread extends Thread{
+    private final Callback callback;
+    private final String json;
+    private final String urlPart;
+
+    RequestThread(String urlPart, String json, Callback callback){
+      this.callback=callback;
+      this.json=json;
+      this.urlPart=urlPart;
+    }
+
+    @Override
+    public void run(){
+      try{
+        Request.Builder requestBuilder = new Request.Builder().url(ENDPOINT + urlPart);
+        requestBuilder.header("Accept", "*/*").post(RequestBody.create(MEDIA_TYPE_JSON, json));
+        Request request=requestBuilder.build();
+        httpClient.newCall(request).enqueue(new HttpCallback(callback));
+      }
+      catch (Exception e){
+        Log.e(TAG, "\nSomething wrong while creating and executing the request thread!\n");
+      }
+    }
   }
 
   private class AuthTask extends AsyncTask<Void, Void, Void> {

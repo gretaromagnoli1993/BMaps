@@ -87,7 +87,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         else{
             Log.i(TAG,"no LatLng for this beacon! skipping");
         }
-        mappa.onResume();
+        //mappa.onResume();//Todo:this is the cause of huge amounts of RenderDrive threads -- must investigate
     }
 
     public void spawnMe(LatLng b){
@@ -104,7 +104,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         else{
             Log.i(TAG,"no LatLng for actual position! skipping");
         }
-        mappa.onResume();
+        //mappa.onResume();
     }
 
 }

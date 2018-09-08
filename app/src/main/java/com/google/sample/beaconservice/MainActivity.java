@@ -58,9 +58,9 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
   public  LatLng actualPosition=null;
   public void onListUpdated(ArrayList<Beacon> list){
     MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
-    for( Beacon b:list ) {
+    /*for( Beacon b:list ) {
       mMap.spawnBeacon(b);
-    }
+    }*///Todo: commentato perché prende troppe risorse
       double[][] position =new double[list.size()][3];
       double distance[]=new double[list.size()];
       for(Beacon beacon: list){
@@ -75,10 +75,12 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
           Optimum optimum = solver.solve();
           double[] centroid = optimum.getPoint().toArray();
           if (convertToLatLng(centroid) != actualPosition) {
-            Log.i(TAG, "centroid:  (" + centroid[0] + "," + centroid[1] + "," + centroid[2] + ")");
+            //Log.i(TAG, "centroid:  (" + centroid[0] + "," + centroid[1] + "," + centroid[2] + ")");
             actualPosition = convertToLatLng(centroid);
             mMap.spawnMe(actualPosition);
-            Log.i(TAG, "Spawning position: " + actualPosition.toString());
+            Integer iterations= optimum.getIterations();
+            Log.i(TAG, "\n iterazioni: "+iterations.toString());
+            //Log.i(TAG, "Spawning position: " + actualPosition.toString());
           }
         }catch(Exception e){
           Log.e(TAG,"too many iterations");
