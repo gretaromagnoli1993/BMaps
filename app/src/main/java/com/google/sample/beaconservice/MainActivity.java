@@ -56,36 +56,34 @@ import org.json.JSONObject;
 public class MainActivity extends Activity  implements MainActivityFragment.OnListUpdated{
   private static final String TAG = MainActivity.class.getSimpleName();
   public  LatLng actualPosition=null;
-
   public void onListUpdated(ArrayList<Beacon> list){
-    int i=list.size()-1;
     MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
-    for( ;i>=0;i--) {
-      Log.i(TAG,"Spawning beacon: "+list.get(i).getLatLng().toString() );
-      mMap.spawnBeacon(list.get(i));
+    for( Beacon b:list ) {
+      mMap.spawnBeacon(b);
     }
-    /*
-    if(i>2){
-      double[][] position =new double[list.size()][2];
+      double[][] position =new double[list.size()][3];
       double distance[]=new double[list.size()];
       for(Beacon beacon: list){
         position[list.indexOf(beacon)][0]=convertToCartesian(beacon.getLatLng())[0];//x
         position[list.indexOf(beacon)][1]=convertToCartesian(beacon.getLatLng())[1];//y
+        position[list.indexOf(beacon)][2]=convertToCartesian(beacon.getLatLng())[2];//z
         distance[list.indexOf(beacon)]=calculateDistance(60,beacon.getRssi());
       }
-
-      NonLinearLeastSquaresSolver solver =new NonLinearLeastSquaresSolver(new TrilaterationFunction(position,distance), new LevenbergMarquardtOptimizer());
-      Optimum optimum=solver.solve();
-      double[] centroid=optimum.getPoint().toArray();//ToDo: inverse function
-      if(convertToLatLng(centroid)!=actualPosition){
-
-        actualPosition=convertToLatLng(centroid);
-        mMap.spawnMe(actualPosition);
-        Log.i(TAG,"Spawning position: "+actualPosition.toString() );
-
+      if((actualPosition==new LatLng(0,0)|true)) { //ToDo: il true bypassa il check sull'ultima posizione (forza il calcolo)
+        NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(new TrilaterationFunction(position, distance), new LevenbergMarquardtOptimizer());
+        try {
+          Optimum optimum = solver.solve();
+          double[] centroid = optimum.getPoint().toArray();
+          if (convertToLatLng(centroid) != actualPosition) {
+            Log.i(TAG, "centroid:  (" + centroid[0] + "," + centroid[1] + "," + centroid[2] + ")");
+            actualPosition = convertToLatLng(centroid);
+            mMap.spawnMe(actualPosition);
+            Log.i(TAG, "Spawning position: " + actualPosition.toString());
+          }
+        }catch(Exception e){
+          Log.e(TAG,"too many iterations");
+        }
       }
-    }
-    */
   }
 
   @Override
@@ -129,12 +127,12 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
     double[] coordinate=new double[]{0,0,0};
     coordinate[0]=R*(Math.cos(Math.toRadians(latLng.latitude)))*Math.cos(Math.toRadians(latLng.longitude));
     coordinate[1]=R*(Math.cos(Math.toRadians(latLng.latitude)))*Math.sin(Math.toRadians(latLng.longitude));
-    coordinate[2]=R*Math.sin(latLng.latitude);
+    coordinate[2]=R*Math.sin(Math.toRadians(latLng.latitude)  );
     return coordinate;
   }
   public LatLng convertToLatLng(double[] coordinate){
     int R= 6371; //raggio medio terra
-    double latitude=Math.asin(coordinate[1]/R)*(180/Math.PI);
+    double latitude=Math.asin(coordinate[2]/R)*(180/Math.PI);
     double longitude;
     if(coordinate [0]>0){
       longitude=Math.atan2(coordinate[1],coordinate[0])*(180/Math.PI);

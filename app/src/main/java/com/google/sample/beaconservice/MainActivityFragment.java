@@ -218,6 +218,7 @@ public class MainActivityFragment extends Fragment{
           case 200:
             try {
               String body = response.body().string();
+              response.body().close();
               fetchedBeacon = new Beacon(new JSONObject(body));
               //Log.i(TAG,"aggiungo il beacon: "+fetchedBeacon.getHexId());
             } catch (JSONException e) {
@@ -253,6 +254,7 @@ public class MainActivityFragment extends Fragment{
             break;
           default:
             Log.e(TAG, "Unhandled beacon service response: " + response);
+            response.body().close();
             return;
         }
         //int pos = arrayAdapter.getPosition(beacon);
@@ -286,7 +288,7 @@ public class MainActivityFragment extends Fragment{
     //client.getBeacon(getBeaconCallback, beacon.getBeaconName());//todo: edited
     try {
       client.getForObserved(getBeaconCallback,getObservedBody(beacon.getId(),getString(R.string.allAttachment)),getString(R.string.api_key));
-    } catch (JSONException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -381,7 +383,7 @@ public class MainActivityFragment extends Fragment{
           arrayAdapter.clear();
           scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
           Log.i(TAG, "starting scan");
-          //client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());
+          client = new ProximityBeaconImpl(getActivity(), accountNameView.getText().toString());//ToDo:ripristinato per null pointer exception (andrebbe eliminato)
           CountDownTimer countDownTimer = new CountDownTimer(SCAN_TIME_MILLIS, 100) {
             @Override
             public void onTick(long millisUntilFinished) {

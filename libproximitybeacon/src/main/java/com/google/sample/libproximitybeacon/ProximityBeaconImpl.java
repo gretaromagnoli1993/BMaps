@@ -35,7 +35,6 @@ import java.io.IOException;
 public class ProximityBeaconImpl implements ProximityBeacon {
   private static final String TAG = ProximityBeaconImpl.class.getSimpleName();
   private static final String ENDPOINT = "https://proximitybeacon.googleapis.com/v1beta1/";
-  //private static final String ENDPOINT = "http://192.168.1.64/v1beta1/"; //todo:none
   private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userlocation.beacon.registry";
   public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -53,7 +52,7 @@ public class ProximityBeaconImpl implements ProximityBeacon {
     this.account = account;
     this.httpClient = new OkHttpClient();
   }
-
+  
   @Override
   public void getForObserved(Callback callback, JSONObject requestBody, String apiKey) {
     // The authorization step here isn't strictly necessary. The API key is enough.

@@ -96,7 +96,7 @@ public class Beacon implements Parcelable {
       //Log.e(TAG,"Error retrieving id from JSON!");
     }
 
-    try {//ToDo: importante! stavi facendo un overload di advertisedId(questo) per rispettare la nuova struttura JSON (fatta di JSONArray)
+    try {//fix for new JSON structure
       JSONObject json= response.getJSONArray("beacons")
               .getJSONObject(0).getJSONObject("advertisedId");
       //Log.i(TAG,json.toString());
@@ -175,7 +175,7 @@ public class Beacon implements Parcelable {
       String encodedData = attachments.getJSONObject(i).getString("data");
       String decodedData = new String(Base64.decode(encodedData, Base64.NO_WRAP));
       Duet attachment=new Duet(decodedName,decodedData);
-      parsed.add(attachment);//todo: make this an array of objects containing namespacedTypes
+      parsed.add(attachment);
     }
 
     return parsed;
