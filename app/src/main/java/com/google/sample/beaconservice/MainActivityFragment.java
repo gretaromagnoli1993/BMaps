@@ -271,6 +271,9 @@ public class MainActivityFragment extends Fragment{
               arrayList.add(fetchedBeacon);
               Log.i(TAG, Objects.requireNonNull(fetchedBeacon.getLatLng(), "No lat/lng found, null").toString());
             }
+            /*else{
+              Log.i(TAG, "\n Beacon alredy known\n");
+            }*/
           }
           else {
             arrayList.add(fetchedBeacon);

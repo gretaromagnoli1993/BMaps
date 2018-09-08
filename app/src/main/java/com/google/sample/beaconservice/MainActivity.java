@@ -19,8 +19,12 @@ import android.app.Fragment;
 //import android.app.FragmentManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
+import android.util.TimeUtils;
+import android.util.TimingLogger;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 //import android.support.v4.app.FragmentManager;
@@ -33,6 +37,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.sample.beaconservice.Beacon;
+import com.google.sample.beaconservice.MainActivityFragment;
+import com.google.sample.beaconservice.MapsFragment;
+import com.google.sample.beaconservice.R;
 import com.google.sample.libproximitybeacon.ProximityBeaconImpl;
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
@@ -43,11 +51,11 @@ import com.squareup.okhttp.Response;
 import org.apache.commons.math3.analysis.function.Cos;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Timer;
+
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +64,7 @@ import org.json.JSONObject;
 public class MainActivity extends Activity  implements MainActivityFragment.OnListUpdated{
   private static final String TAG = MainActivity.class.getSimpleName();
   public  LatLng actualPosition=null;
+  File logFile;
   public void onListUpdated(ArrayList<Beacon> list){
     MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
     /*for( Beacon b:list ) {
@@ -63,7 +72,9 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
     }*///Todo: commentato perché prende troppe risorse
       double[][] position =new double[list.size()][3];
       double distance[]=new double[list.size()];
-      for(Beacon beacon: list){
+      writeLogFile("\n\ntime:"+ System.nanoTime()+"\n\n",logFile,this);
+    for(Beacon beacon: list){
+        writeLogFile(beacon.getHexId()+","+beacon.getLatLng().toString()+","+beacon.getRssi(),logFile,this);
         position[list.indexOf(beacon)][0]=convertToCartesian(beacon.getLatLng())[0];//x
         position[list.indexOf(beacon)][1]=convertToCartesian(beacon.getLatLng())[1];//y
         position[list.indexOf(beacon)][2]=convertToCartesian(beacon.getLatLng())[2];//z
@@ -79,12 +90,17 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
             actualPosition = convertToLatLng(centroid);
             mMap.spawnMe(actualPosition);
             Integer iterations= optimum.getIterations();
+            writeLogFile("\nfound,"+actualPosition.toString()+",iterazioni: "+iterations,logFile,this);
             Log.i(TAG, "\n iterazioni: "+iterations.toString());
             //Log.i(TAG, "Spawning position: " + actualPosition.toString());
           }
         }catch(Exception e){
           Log.e(TAG,"too many iterations");
+          writeLogFile("\nNOT found",logFile,this);
+
         }
+        writeLogFile("\n\n\n",logFile,this);
+
       }
   }
 
@@ -103,7 +119,12 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
     fragmentTransaction.add(R.id.listFragment, lista,"List_frag");
 
     fragmentTransaction.commit();
-
+    try {
+      logFile = new File(Environment.getExternalStorageDirectory().getPath() + "/beaconLog.txt");
+    }
+    catch (Exception e){
+      Log.e(TAG, "Cannot open log file !");
+    }
 
   }
   public Double calculateDistance(int txPower, int rssi) {
@@ -149,5 +170,18 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
 
   }
 
-
+  private void writeLogFile(String message, File file , Context ctx){
+    try {
+      // File file = new File(Environment.getExternalStorageDirectory().getPath()+"/beaconLog.txt");
+      //if(!file.exists()) file.createNewFile();
+      FileOutputStream fOut = new FileOutputStream(file,true);
+      OutputStreamWriter myOutWriter =
+              new OutputStreamWriter(fOut);
+      myOutWriter.append(message);
+      myOutWriter.close();
+      fOut.close();
+    } catch (Exception e) {
+      Log.e(TAG,e.toString());
+    }
+  }
 }
