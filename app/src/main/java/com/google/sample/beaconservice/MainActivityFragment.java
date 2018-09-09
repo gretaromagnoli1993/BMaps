@@ -33,11 +33,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.ParcelUuid;
+import android.os.*;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -64,6 +60,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -84,8 +81,7 @@ public class MainActivityFragment extends Fragment{
   }
 
   //create an instance of this interface
-
-
+  private File file;
 
   private static final String TAG = MainActivityFragment.class.getSimpleName();
   private static final long SCAN_TIME_MILLIS = 5000;
@@ -138,7 +134,7 @@ public class MainActivityFragment extends Fragment{
   private TextView accountNameView;
   public Runnable runThis;
 
-  ProximityBeacon client= new ProximityBeaconImpl(getActivity(), "".toString());;
+  ProximityBeacon client= new ProximityBeaconImpl(getActivity(), "");
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -146,6 +142,8 @@ public class MainActivityFragment extends Fragment{
     sharedPreferences = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
     arrayList = new ArrayList<>();
     discovered = new ArrayList<>();
+    // debugging purpose
+    file=new File(Environment.getExternalStorageDirectory()+"/discoveredLog.txt");
     arrayAdapter = new BeaconArrayAdapter(getActivity(), R.layout.beacon_list_item, arrayList);
     scanCallback = new ScanCallback() {
       @Override
@@ -176,7 +174,7 @@ public class MainActivityFragment extends Fragment{
 
         // Draw it immediately and kick off a async request to fetch the registration status,
         // redrawing when the server returns.
-        Log.i(TAG, "id " + Utils.toHexString(id) + ", rssi " + result.getRssi());
+        //Log.i(TAG, "id " + Utils.toHexString(id) + ", rssi " + result.getRssi());
 
         Beacon beacon = new Beacon("EDDYSTONE", id, Beacon.STATUS_UNSPECIFIED, result.getRssi());
         insertIntoListAndFetchStatus(beacon);
@@ -203,7 +201,6 @@ public class MainActivityFragment extends Fragment{
 
   private void insertIntoListAndFetchStatus(final Beacon beacon) {
     //arrayAdapter.add(beacon);
-    //Toast.makeText(this.getActivity(), "Distance: "+calculateDistance(-60,beacon.getRssi()).shortValue()+"m", Toast.LENGTH_SHORT).show();
     //arrayAdapter.sort(RSSI_COMPARATOR);
     Callback getBeaconCallback = new Callback() {
       @Override
@@ -220,31 +217,38 @@ public class MainActivityFragment extends Fragment{
               String body = response.body().string();
               response.body().close();
               fetchedBeacon = new Beacon(new JSONObject(body));
-              //Log.i(TAG,"aggiungo il beacon: "+fetchedBeacon.getHexId());
+              fetchedBeacon.setRssi(beacon.getRssi());//fix for rssi not retained
             } catch (JSONException e) {
               Log.e(TAG, "JSONException", e);
               return;
             }
-            if(fetchedBeacon!=null){
-              //Log.i(TAG, "beacon non nullo");
-              if (discovered.size()==0) {
+            if(fetchedBeacon!=null&fetchedBeacon.latitude!=null&fetchedBeacon.longitude!=null){
+              if(!arrayListContainsId(discovered,fetchedBeacon.id)){
                 discovered.add(fetchedBeacon);
-              } else {
-                boolean tmp=false;
-                for(Beacon b:discovered ){
-                  if(!b.getHexId().equals(fetchedBeacon.getHexId())){
-                    tmp=true;
-                  }
-                  else{
-                    if(b.getRssi().intValue()!=fetchedBeacon.getRssi().intValue())
-                      b.setRssi(fetchedBeacon.getRssi());
+                arrayList.add(fetchedBeacon);
+                Log.i(TAG,"nuovo beacon: "+fetchedBeacon.getHexId());
+              }
+              else{
+                Integer position=null;
+                for(Beacon b: discovered){
+                  if(Arrays.equals(b.id,fetchedBeacon.id)){
+                    position=discovered.indexOf(b);
+                    Log.i(TAG, "ALMENO QUI CI ARRIVIAMO");
                   }
                 }
-                if(tmp) {
-                  discovered.add(fetchedBeacon);
+                if(position!=null){
+                  discovered.get(position).setRssi(beacon.getRssi());
+                  Log.i(TAG,"vecchio beacon: "+fetchedBeacon.getHexId()+", nuovo rssi: "+beacon.getRssi());
+                }
+                if(!arrayListContainsId(arrayList,fetchedBeacon.id)){
+                  arrayList.add(fetchedBeacon);
                 }
               }
             }
+            else{
+              Log.w(TAG,"Problems retrieving lat/lng attachment. Is it assigned online?");
+            }
+
             break;
           case 403:
             fetchedBeacon = new Beacon(beacon.type, beacon.id, Beacon.NOT_AUTHORIZED, beacon.rssi);
@@ -257,35 +261,19 @@ public class MainActivityFragment extends Fragment{
             response.body().close();
             return;
         }
-        //int pos = arrayAdapter.getPosition(beacon);
-        //arrayList.set(pos, fetchedBeacon);
-        if(fetchedBeacon.latitude!=null&fetchedBeacon.longitude!=null) {
-          if (arrayList.size() > 0) {
-            int flag=0;
-            for (int i = arrayList.size()-1; i >= 0; i--) {
-              if (!fetchedBeacon.getHexId().equals(arrayList.get(i).getHexId())) {
-                flag=1;
-              }
-            }
-            if(flag==0) {
-              arrayList.add(fetchedBeacon);
-              Log.i(TAG, Objects.requireNonNull(fetchedBeacon.getLatLng(), "No lat/lng found, null").toString());
-            }
-            /*else{
-              Log.i(TAG, "\n Beacon alredy known\n");
-            }*/
-          }
-          else {
-            arrayList.add(fetchedBeacon);
-          }
-        }
-
        updateArrayAdapter();
+        /*   //debugging purpose
         if(discovered!=null) {
           if (discovered.size() >= 3) {
-            mCallback.onListUpdated(discovered);
+            for(Beacon b: discovered){
+              MainActivity.writeLogFile(b.getHexId()+","+b.rssi+"\n",file,MainActivityFragment.super.getActivity());
+            }
+            MainActivity.writeLogFile("\n\n\n\n",file,MainActivityFragment.super.getActivity());
+            //end debugging
+            //mCallback.onListUpdated(discovered);
           }
         }
+         */
       }
     };
     //client.getBeacon(getBeaconCallback, beacon.getBeaconName());//todo: edited
@@ -406,7 +394,11 @@ public class MainActivityFragment extends Fragment{
               scanner.stopScan(scanCallback);
               Log.i(TAG, "stopped scan");
               Utils.setEnabledViews(true, scanButton);
-              handler.postDelayed(runThis,1000);
+              if(discovered.size()>=3) {//it really makes sense only to do this if we know we have at least 3 beacons
+                mCallback.onListUpdated(discovered);//moved here to avoid wasting resources.
+              }
+              //Todo: add a cleaning cycle for "discovered" to prune too distant beacons (rssi<=smth)
+              handler.postDelayed(runThis,1000); //loop
             }
           };
           handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);

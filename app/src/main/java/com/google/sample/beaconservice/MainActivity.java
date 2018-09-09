@@ -74,7 +74,7 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
       double distance[]=new double[list.size()];
       writeLogFile("\n\ntime:"+ System.nanoTime()+"\n\n",logFile,this);
     for(Beacon beacon: list){
-        writeLogFile(beacon.getHexId()+","+beacon.getLatLng().toString()+","+beacon.getRssi(),logFile,this);
+        writeLogFile(beacon.getHexId()+","+beacon.getLatLng().toString()+","+beacon.getRssi()+"\n",logFile,this);
         position[list.indexOf(beacon)][0]=convertToCartesian(beacon.getLatLng())[0];//x
         position[list.indexOf(beacon)][1]=convertToCartesian(beacon.getLatLng())[1];//y
         position[list.indexOf(beacon)][2]=convertToCartesian(beacon.getLatLng())[2];//z
@@ -86,7 +86,7 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
           Optimum optimum = solver.solve();
           double[] centroid = optimum.getPoint().toArray();
           if (convertToLatLng(centroid) != actualPosition) {
-            //Log.i(TAG, "centroid:  (" + centroid[0] + "," + centroid[1] + "," + centroid[2] + ")");
+            Log.i(TAG, "centroid:  (" + centroid[0] + "," + centroid[1] + "," + centroid[2] + ")");
             actualPosition = convertToLatLng(centroid);
             mMap.spawnMe(actualPosition);
             Integer iterations= optimum.getIterations();
@@ -170,7 +170,7 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
 
   }
 
-  private void writeLogFile(String message, File file , Context ctx){
+  public static void writeLogFile(String message, File file , Context ctx){
     try {
       // File file = new File(Environment.getExternalStorageDirectory().getPath()+"/beaconLog.txt");
       //if(!file.exists()) file.createNewFile();
