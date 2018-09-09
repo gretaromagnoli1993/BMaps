@@ -26,6 +26,7 @@ import android.util.Log;
 import android.util.TimeUtils;
 import android.util.TimingLogger;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 //import android.support.v4.app.FragmentManager;
 
@@ -66,10 +67,12 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
   public  LatLng actualPosition=null;
   File logFile;
   public void onListUpdated(ArrayList<Beacon> list){
+    TextView dbOffset=(TextView)findViewById(R.id.dboffset);//il valore dovrebbe essere intorno ai 60 ma va meglio con 150
     MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
-    /*for( Beacon b:list ) {
+    for( Beacon b:list ) {
       mMap.spawnBeacon(b);
-    }*///Todo: commentato perché prende troppe risorse
+    }
+    ///Todo: commentato perché prende troppe risorse
       double[][] position =new double[list.size()][3];
       double distance[]=new double[list.size()];
       writeLogFile("\n\ntime:"+ System.nanoTime()+"\n\n",logFile,this);
@@ -78,7 +81,7 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
         position[list.indexOf(beacon)][0]=convertToCartesian(beacon.getLatLng())[0];//x
         position[list.indexOf(beacon)][1]=convertToCartesian(beacon.getLatLng())[1];//y
         position[list.indexOf(beacon)][2]=convertToCartesian(beacon.getLatLng())[2];//z
-        distance[list.indexOf(beacon)]=calculateDistance(60,beacon.getRssi());
+        distance[list.indexOf(beacon)]=calculateDistance(Integer.parseInt(dbOffset.getText().toString()),beacon.getRssi());
       }
       if((actualPosition==new LatLng(0,0)|true)) { //ToDo: il true bypassa il check sull'ultima posizione (forza il calcolo)
         NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(new TrilaterationFunction(position, distance), new LevenbergMarquardtOptimizer());

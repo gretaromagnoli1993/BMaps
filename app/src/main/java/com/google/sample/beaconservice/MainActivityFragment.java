@@ -398,7 +398,7 @@ public class MainActivityFragment extends Fragment{
                 mCallback.onListUpdated(discovered);//moved here to avoid wasting resources.
               }
               //Todo: add a cleaning cycle for "discovered" to prune too distant beacons (rssi<=smth)
-              handler.postDelayed(runThis,1000); //loop
+              //handler.postDelayed(runThis,1000); //loop
             }
           };
           handler.postDelayed(stopScanning, SCAN_TIME_MILLIS);

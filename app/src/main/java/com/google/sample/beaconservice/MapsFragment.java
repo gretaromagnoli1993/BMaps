@@ -87,7 +87,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         else{
             Log.i(TAG,"no LatLng for this beacon! skipping");
         }
-        //mappa.onResume();//Todo:this is the cause of huge amounts of RenderDrive threads -- must investigate
     }
 
     public void spawnMe(LatLng b){
@@ -100,6 +99,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
             }
             Marker posizione =mMap.addMarker(new MarkerOptions().position(b).title("me").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
             postionList.add(posizione);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(b));
+
         }
         else{
             Log.i(TAG,"no LatLng for actual position! skipping");
