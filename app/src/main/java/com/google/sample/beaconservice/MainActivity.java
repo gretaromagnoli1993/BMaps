@@ -66,6 +66,8 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
   private static final String TAG = MainActivity.class.getSimpleName();
   public  LatLng actualPosition=null;
   File logFile;
+  int counter=0;
+
   public void onListUpdated(ArrayList<Beacon> list){
     TextView dbOffset=(TextView)findViewById(R.id.dboffset);//il valore dovrebbe essere intorno ai 60 ma va meglio con 150
     MapsFragment mMap =(MapsFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
@@ -75,9 +77,9 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
     ///Todo: commentato perché prende troppe risorse
       double[][] position =new double[list.size()][3];
       double distance[]=new double[list.size()];
-      writeLogFile("\n\ntime:"+ System.nanoTime()+"\n\n",logFile,this);
+      //writeLogFile("\n\ntime:"+ System.nanoTime()+"\n\n",logFile,this);
     for(Beacon beacon: list){
-        writeLogFile(beacon.getHexId()+","+beacon.getLatLng().toString()+","+beacon.getRssi()+"\n",logFile,this);
+        writeLogFile("\n"+counter+";\t"+"#"+System.nanoTime()+";\t"+beacon.getHexId()+";\t"+beacon.latitude+";\t"+beacon.longitude+";\t"+beacon.getRssi()+";\t",logFile,this);
         position[list.indexOf(beacon)][0]=convertToCartesian(beacon.getLatLng())[0];//x
         position[list.indexOf(beacon)][1]=convertToCartesian(beacon.getLatLng())[1];//y
         position[list.indexOf(beacon)][2]=convertToCartesian(beacon.getLatLng())[2];//z
@@ -93,17 +95,17 @@ public class MainActivity extends Activity  implements MainActivityFragment.OnLi
             actualPosition = convertToLatLng(centroid);
             mMap.spawnMe(actualPosition);
             Integer iterations= optimum.getIterations();
-            writeLogFile("\nfound,"+actualPosition.toString()+",iterazioni: "+iterations,logFile,this);
-            Log.i(TAG, "\n iterazioni: "+iterations.toString());
+            writeLogFile("found;\t"+actualPosition.latitude+";\t"+actualPosition.longitude+";\t"+"iterations"+";\t"+iterations,logFile,this);
+            Log.i(TAG, "\n iterations: "+iterations.toString());
             //Log.i(TAG, "Spawning position: " + actualPosition.toString());
           }
         }catch(Exception e){
           Log.e(TAG,"too many iterations");
-          writeLogFile("\nNOT found",logFile,this);
+          writeLogFile("NOT found;",logFile,this);
 
         }
-        writeLogFile("\n\n\n",logFile,this);
-
+        writeLogFile("\n",logFile,this);
+        counter++;
       }
   }
 
