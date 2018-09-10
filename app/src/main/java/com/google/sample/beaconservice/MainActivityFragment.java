@@ -34,6 +34,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.*;
+import android.support.annotation.IntegerRes;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -399,7 +400,6 @@ public class MainActivityFragment extends Fragment{
               if(discovered.size()>=3) {//it really makes sense only to do this if we know we have at least 3 beacons
                 mCallback.onListUpdated(discovered);//moved here to avoid wasting resources.
               }
-              //Todo: add a cleaning cycle for "discovered" to prune too distant beacons (rssi<=smth)
               //handler.postDelayed(runThis,1000); //loop
             }
           };
