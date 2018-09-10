@@ -4,8 +4,8 @@
   <string name="latlngAttachment">beacon-tirocinio/latLng</string>
   <string name="allAttachment">*</string>
 
+  <string name="api_key_default">API Key here. Will be retained upon restarts.</string>
   <string name="api_key">AIzaSyAOH0j4JgZxZTa7XTAYpPZBGCFxJEkVyGU</string>
-
   <string-array name="stability_enums">
     <item>STABLE</item>
     <item>PORTABLE</item>

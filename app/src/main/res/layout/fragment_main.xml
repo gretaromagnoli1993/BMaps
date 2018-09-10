@@ -16,32 +16,30 @@
       android:layout_centerHorizontal="true"
       android:layout_alignParentTop="true"/>
 
-  <TextView
-      android:id="@+id/accountName"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_below="@id/scanButton"
-      android:layout_centerHorizontal="true"
-      android:layout_centerVertical="true"
-      android:layout_marginTop="5dp"
-      android:drawableEnd="@drawable/ic_action_mode_edit"
-      android:drawablePadding="5dp"
-      android:text="Select account to use" />
-
+  <EditText
+          android:layout_width="match_parent"
+          android:ems="10"
+          android:id="@+id/apikey"
+          android:layout_margin="0dp"
+          android:layout_height="wrap_content"
+          android:layout_below="@+id/scanButton"
+          android:layout_centerHorizontal="true" android:layout_centerVertical="true" android:layout_marginTop="5dp"
+          android:gravity="center_horizontal"
+          android:textAppearance="@android:style/TextAppearance.Material.Small"/>
   <ProgressBar
-      android:id="@+id/progressBar"
-      style="@android:style/Widget.ProgressBar.Horizontal"
-      android:layout_width="match_parent"
-      android:layout_height="2dp"
-      android:layout_centerHorizontal="true"
-      android:layout_below="@id/accountName"
-      android:layout_marginTop="5dp"/>
+          android:id="@+id/progressBar"
+          style="@android:style/Widget.ProgressBar.Horizontal"
+          android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:layout_centerHorizontal="true"
+          android:layout_below="@+id/apikey"
+          android:layout_marginTop="5dp"/>
 
   <ListView
       android:id="@+id/listView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_below="@id/accountName"
+      android:layout_below="@id/apikey"
       android:layout_centerHorizontal="true"
       android:layout_marginTop="5dp"/>
 

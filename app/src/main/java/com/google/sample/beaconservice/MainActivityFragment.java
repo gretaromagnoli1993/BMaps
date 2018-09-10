@@ -59,6 +59,7 @@ import com.squareup.okhttp.Callback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,8 +132,8 @@ public class MainActivityFragment extends Fragment{
   private ScanCallback scanCallback;
   private BluetoothLeScanner scanner;
   private Button scanButton;
-  private TextView accountNameView;
   public Runnable runThis;
+  private TextView apiKeyView;
 
   ProximityBeacon client= new ProximityBeaconImpl(getActivity(), "");
 
@@ -233,7 +234,6 @@ public class MainActivityFragment extends Fragment{
                 for(Beacon b: discovered){
                   if(Arrays.equals(b.id,fetchedBeacon.id)){
                     position=discovered.indexOf(b);
-                    Log.i(TAG, "ALMENO QUI CI ARRIVIAMO");
                   }
                 }
                 if(position!=null){
@@ -278,7 +278,7 @@ public class MainActivityFragment extends Fragment{
     };
     //client.getBeacon(getBeaconCallback, beacon.getBeaconName());//todo: edited
     try {
-      client.getForObserved(getBeaconCallback,getObservedBody(beacon.getId(),getString(R.string.allAttachment)),getString(R.string.api_key));
+      client.getForObserved(getBeaconCallback,getObservedBody(beacon.getId(),getString(R.string.allAttachment)),apiKeyView.getText().toString());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -328,7 +328,7 @@ public class MainActivityFragment extends Fragment{
       // Receiving a result from the AccountPicker
       if (resultCode == Activity.RESULT_OK) {
         String name = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-        accountNameView.setText(name);
+        //accountNameView.setText(name);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("accountName", name);
         editor.apply();
@@ -354,7 +354,8 @@ public class MainActivityFragment extends Fragment{
                            ViewGroup container,
                            Bundle savedInstanceState) {
     View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
+    apiKeyView=(TextView)rootView.findViewById(R.id.apikey);
+    apiKeyView.setText(sharedPreferences.getString("apikey",getString(R.string.api_key)));
     final ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
     progressBar.setProgress(0);
     progressBar.getProgressDrawable().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
@@ -371,6 +372,7 @@ public class MainActivityFragment extends Fragment{
       public void run() {
 
           Utils.setEnabledViews(false, scanButton);
+          sharedPreferences.edit().putString("apikey",apiKeyView.getText().toString()).apply();
           arrayAdapter.clear();
           scanner.startScan(SCAN_FILTERS, SCAN_SETTINGS, scanCallback);
           Log.i(TAG, "starting scan");
@@ -412,21 +414,21 @@ public class MainActivityFragment extends Fragment{
 
       }});
 
-    accountNameView = (TextView)rootView.findViewById(R.id.accountName);
-    accountNameView.setOnClickListener(new View.OnClickListener() {
+    //accountNameView = (TextView)rootView.findViewById(R.id.accountName);
+    /*accountNameView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         pickUserAccount();
       }
-    });
+    });*/
 
     // Set the account name from the shared prefs if we ever set it before.
     String accountName = sharedPreferences.getString("accountName", "");
-    if (!accountName.isEmpty()) {
+    /*if (!accountName.isEmpty()) {
       accountNameView.setText(accountName);
     } else {
       pickUserAccount();
-    }
+    }*/
 
     ListView listView = (ListView)rootView.findViewById(R.id.listView);
     listView.setAdapter(arrayAdapter);
