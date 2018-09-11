@@ -48,7 +48,7 @@ public class Beacon implements Parcelable {
   // These constants are convenience for this app:
   static final String UNREGISTERED = "UNREGISTERED";
   static final String NOT_AUTHORIZED = "NOT_AUTHORIZED";
-  static final String PROJECT_ID= "beacon-tirocinio";
+  static final String PROJECT_ID= "(.*/)";//changed with regex!
 
 
   String type;
@@ -170,7 +170,8 @@ public class Beacon implements Parcelable {
             .getJSONArray("attachments");
 
     for (int i=0; i < attachments.length(); i++) {
-      String decodedName = attachments.getJSONObject(i).getString("namespacedType").replace(PROJECT_ID+"/","");
+      String decodedName = attachments.getJSONObject(i).getString("namespacedType").replaceAll(PROJECT_ID,"");
+      Log.i(TAG,decodedName);
       //String decodedName = new String(Base64.decode(encodedName, Base64.NO_WRAP));
       String encodedData = attachments.getJSONObject(i).getString("data");
       String decodedData = new String(Base64.decode(encodedData, Base64.NO_WRAP));
